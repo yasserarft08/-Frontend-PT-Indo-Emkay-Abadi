@@ -1,9 +1,9 @@
 export interface productInterface {
-    id: number;
+    id?: number;
     product_name: string;
     category: string;
     price: number;
-    discount: number;
+    discount?: number;
 }
 
 export type productList = productInterface[]

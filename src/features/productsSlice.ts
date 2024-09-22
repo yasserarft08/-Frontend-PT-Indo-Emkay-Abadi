@@ -9,11 +9,6 @@ export const fetchProducts = createAsyncThunk<productInterface[], void>("product
     return response.data;
 });
 
-export const deleteProduct = createAsyncThunk("product/delete", async (id:number) => {
-    const response = await axios.delete( `${apiUrl}/${id}`);
-    return response.data;
-})
-
 type statusInterface = "idle" | "loading" | "succeeded" | "failed"
 
 const productSlice = createSlice({
@@ -36,17 +31,6 @@ const productSlice = createSlice({
             .addCase(fetchProducts.rejected, (state) => {
                 state.status = "failed";
             })
-            // status delete
-            // .addCase(fetchProducts.pending, (state) => {
-            //     state.deleteStatus = "loading";
-            // })
-            // .addCase(fetchProducts.fulfilled, (state) => {
-            //     state.deleteStatus = "succeeded";
-            // })
-            // .addCase(fetchProducts.rejected, (state) => {
-            //     state.deleteStatus = "failed";
-            // });
-            
     },
 });
 

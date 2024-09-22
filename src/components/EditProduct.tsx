@@ -2,11 +2,12 @@ import { Box, Button, TextField } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { UnknownAction } from "redux";
 import { z } from "zod";
 import { fetchProducts } from "../features/productsSlice";
-import { apiUrl } from "../util/api";
 import { RootState } from "../store/store";
 import { productInterface } from "../types/product";
+import { apiUrl } from "../util/api";
 
 const productSchema = z.object({
     product_name: z.string().min(1, 'Product name is required'),
@@ -25,18 +26,18 @@ interface errorInterface {
 
 interface EditProductInterface {
     onClose: () => void;
-    id: number
+    id?: number
 }
 
 const EditProduct: React.FC<EditProductInterface> = ({ onClose, id }) => {
     const dispatch = useDispatch();
-    const dataProduct: productInterface = useSelector((state: RootState) => state.products.items).find((item: productInterface) => id === item.id) ?? {};
+    const dataProduct = useSelector((state: RootState) => state.products.items).find((item: productInterface) => id === item.id) as productInterface;
     const [product, setProduct] = useState<productInterface>({
         id: id,
         product_name: dataProduct.product_name ?? "",
         category: dataProduct?.category ?? "",
         price: dataProduct?.price ?? 0,
-        discount: dataProduct?.discount ?? null
+        discount: dataProduct?.discount
     });
     const [errors, setErrors] = useState<errorInterface>({});
 
@@ -52,13 +53,13 @@ const EditProduct: React.FC<EditProductInterface> = ({ onClose, id }) => {
             productSchema.parse({
                 product_name: product.product_name,
                 category: product.category,
-                price: parseFloat(product.price),
-                discount: product.discount ? parseFloat(product.discount) : undefined,
+                price: product.price,
+                discount: product.discount,
             });
 
             await axios.put(`${apiUrl}/products/${id}`, product);
-            dispatch(fetchProducts()); // Refresh the product list
-            setProduct({ product_name: '', category: '', price: '', discount: '' }); // Reset form
+            dispatch(fetchProducts() as unknown as UnknownAction); // Refresh the product list
+            setProduct({ product_name: '', category: '', price: 0, discount: undefined }); // Reset form
             onClose();
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -72,7 +73,7 @@ const EditProduct: React.FC<EditProductInterface> = ({ onClose, id }) => {
     };
 
     return dataProduct && (
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ padding: '20px' }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate >
             <TextField
                 label="Product Name"
                 name="product_name"
@@ -118,8 +119,8 @@ const EditProduct: React.FC<EditProductInterface> = ({ onClose, id }) => {
                 error={!!errors.discount}
                 helperText={errors.discount}
             />
-            <Button type="submit" variant="contained" color="primary">
-                Add Product
+            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }} fullWidth>
+                Save
             </Button>
         </Box>
     );

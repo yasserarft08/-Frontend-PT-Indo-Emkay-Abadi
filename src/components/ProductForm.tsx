@@ -5,6 +5,7 @@ import { z } from "zod";
 import { fetchProducts } from "../features/productsSlice";
 import { Box, Button, TextField } from "@mui/material";
 import { apiUrl } from "../util/api";
+import { UnknownAction } from "redux";
 
 const productSchema = z.object({
     product_name: z.string().min(1, 'Product name is required'),
@@ -48,7 +49,7 @@ const AddProductForm: React.FC<AddProductFormInterface> = ({onClose}) => {
             });
 
             await axios.post(`${apiUrl}/products`, product);
-            dispatch(fetchProducts()); // Refresh the product list
+            dispatch(fetchProducts() as unknown as UnknownAction); // Refresh the product list
             setProduct({ product_name: '', category: '', price: '', discount: '' }); // Reset form
             onClose();
         } catch (error) {
@@ -64,7 +65,7 @@ const AddProductForm: React.FC<AddProductFormInterface> = ({onClose}) => {
     };
 
     return (
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ padding: '20px' }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
             <TextField
                 label="Product Name"
                 name="product_name"
@@ -110,7 +111,7 @@ const AddProductForm: React.FC<AddProductFormInterface> = ({onClose}) => {
                 error={!!errors.discount}
                 helperText={errors.discount}
             />
-            <Button type="submit" variant="contained" color="primary">
+            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }} fullWidth>
                 Add Product
             </Button>
         </Box>
